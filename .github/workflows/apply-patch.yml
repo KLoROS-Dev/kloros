@@ -5,12 +5,11 @@ on:
     types: [created]
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 jobs:
   apply:
-    # Only act if the comment contains '/apply' and the commenter is allowed
     if: |
       contains(github.event.comment.body, '/apply') &&
       (
@@ -22,10 +21,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repo
+      - name: Check out
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.BOT_TOKEN }}
+
+      - name: Ensure remote uses PAT (for push)
+        run: |
+          git remote set-url origin "https://x-access-token:${{ secrets.BOT_TOKEN }}@github.com/HomoYouDidnt/kloros.git"
+          git config user.name "kloros-bot"
+          git config user.email "bot@users.noreply.github.com"
 
       - name: Extract patch from comment
         id: extract
@@ -49,18 +55,13 @@ jobs:
         env:
           PATCH: ${{ steps.extract.outputs.patch }}
         run: |
-          git config user.name "kloros-bot"
-          git config user.email "bot@users.noreply.github.com"
-
           git fetch origin dev
           git switch -c "bot/patch-$(date +%Y%m%d-%H%M%S)" origin/dev
-
           if ! git apply --whitespace=fix -3 "$PATCH"; then
             echo "Patch failed to apply cleanly."
             git checkout -- .
             exit 1
           fi
-
           git add -A
           git commit -m "apply: patch from @${GITHUB_ACTOR}"
           git push -u origin HEAD
@@ -68,7 +69,7 @@ jobs:
       - name: Open PR into dev
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT_TOKEN }}
           base: dev
           title: "Apply patch from @${{ github.actor }}"
           body: |
