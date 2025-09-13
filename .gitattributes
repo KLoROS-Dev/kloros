@@ -1,0 +1,22 @@
+# Normalize text files to LF in repo; convert to CRLF on checkout on Windows as needed
+* text=auto eol=lf
+
+# Mark common binary types
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.7z binary
+*.wav binary
+*.mp3 binary
+*.mp4 binary
+
+# Keep these with LF always (scripts/pyproject/CI)
+*.sh text eol=lf
+*.py text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
