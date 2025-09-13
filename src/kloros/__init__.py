@@ -1,1 +1,3 @@
-"""KLoROS package root."""
+﻿"""KLoROS package root."""
+
+from ._version import __version__ as __version__

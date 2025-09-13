@@ -1,2 +1,2 @@
-def ping() -> str:
+﻿def ping() -> str:
     return "pong"
